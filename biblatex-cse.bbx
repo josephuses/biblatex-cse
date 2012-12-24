@@ -1,0 +1,200 @@
+\ProvidesFile{biblatex-cse.bbx}
+
+\RequireBibliographyStyle{authoryear}
+
+\ExecuteBibliographyOptions{
+firstinits=true,
+isbn=true,
+dashed=false,
+eprint=true,
+maxbibnames=99,
+alldates=long,
+doi=true,
+uniquename=init
+}
+
+% ... and remove italization of titles
+\renewcommand{\bibinitperiod}{}
+\renewcommand{\bibinitdelim}{}
+\renewcommand{\finalnamedelim}{, }
+\renewcommand*{\revsdnamepunct}{}
+
+% Remove quotation marks around journal titles etc.
+\DeclareFieldFormat
+  [article,inbook,incollection,inproceedings,patent,thesis,unpublished]
+  {title}{#1\isdot}
+
+% Print last name first before first name
+
+\DeclareNameAlias{sortname}{last-first}
+\DeclareNameAlias{default}{last-first} % changes that of the editor and others
+%\DeclareNameAlias{editorname}{last-first}
+\DeclareNameAlias{editora}{editor}
+\DeclareNameAlias{editorb}{editor}
+\DeclareNameAlias{editorc}{editor}
+
+% ... and remove italization of titles
+
+\DeclareFieldFormat{journaltitle}{#1}
+\DeclareFieldFormat{maintitle}{#1}
+\DeclareFieldFormat{sorttitle}{#1}
+\DeclareFieldFormat{title}{#1}
+\DeclareFieldFormat{booktitle}{#1}
+\DeclareFieldFormat{issuetitle}{#1}
+\DeclareFieldFormat{pages}{#1}% no prefix for the `pages` field in the bibliography
+
+
+% Make all titles except for journal title and journalsubtitle Sentence case
+
+\DeclareFieldFormat{titlecase}{\MakeTitleCase{#1}}
+
+\newrobustcmd{\MakeTitleCase}[1]{%
+  \ifthenelse{%
+  \ifcurrentfield{booktitle}\OR\ifcurrentfield{booksubtitle}%
+    \OR\ifcurrentfield{maintitle}\OR\ifcurrentfield{mainsubtitle}%
+    \OR\ifcurrentfield{journaltitle}\OR\ifcurrentfield{journalsubtitle}%
+    %\OR\ifcurrentfield{issuetitle}\OR\ifcurrentfield{issuesubtitle}%
+    %\OR\ifentrytype{book}\OR\ifentrytype{mvbook}\OR\ifentrytype{bookinbook}%
+    %\OR\ifentrytype{booklet}\OR\ifentrytype{suppbook}%
+    %\OR\ifentrytype{collection}\OR\ifentrytype{mvcollection}%
+    %\OR\ifentrytype{suppcollection}\OR\ifentrytype{manual}%
+    %\OR\ifentrytype{periodical}\OR\ifentrytype{suppperiodical}%
+    %\OR\ifentrytype{proceedings}\OR\ifentrytype{mvproceedings}%
+    %\OR\ifentrytype{reference}\OR\ifentrytype{mvreference}%
+    %\OR\ifentrytype{report}\OR\ifentrytype{thesis}
+    }
+    {#1}
+    {\MakeSentenceCase{#1}
+    }}
+
+% Remove parentheses around dates
+
+\renewbibmacro*{date+extrayear}{%
+    \iffieldundef{year}
+      {}
+      {\printtext{%
+     \addperiod\space\printfield{labelyear}%
+     \printfield{extrayear}}}}
+
+\NewBibliographyString{available}
+\NewBibliographyString{cited}
+
+\DefineBibliographyStrings{english}{%
+  available = {Available from},
+}
+
+% Redefined url+urldate macro
+\DeclareFieldFormat{url}{\bibstring{available}\addcolon\space\url{#1}}
+\DeclareFieldFormat{urldate}{#1}
+\DeclareFieldFormat{urlday}{#1}
+
+\renewbibmacro*{url+urldate}{%
+  \iffieldundef{urlyear}
+    {}
+%    {\setunit*{\addspace}%
+%     }
+  {\printtext{[}%
+  		\iffieldundef{urlupyear}
+  			{}
+  			{\printtext{updated}\space\printfield{urlupyear}
+  			\mkbibmonth{\thefield{urlupmonth}}
+			\stripzeros{\thefield{urlupday}}\addsemicolon\space
+  		}%
+  \printtext{cited}\space%
+  \printfield{urlyear}
+	\mkbibmonth{\thefield{urlmonth}}
+	\stripzeros{\thefield{urlday}}%
+  \printtext{].}\space%
+  \printfield{url}%
+  }
+}
+
+% Add another bibtex entry for medium designator in online titles
+\DeclareSourcemap{
+  \maps[datatype=bibtex]{
+    \map{
+      \step[fieldsource=medium, fieldtarget=usera]
+      \step[fieldsource=urlupdate, fieldtarget=extradate]
+    }
+  }
+}
+
+% This is a problematic part
+\renewbibmacro*{title}{%
+  \ifboolexpr{
+    test {\iffieldundef{title}}
+    and
+    test {\iffieldundef{subtitle}}
+  }
+    {}
+    {\printtext[title]{%
+       \printfield[sentencecase]{title}%
+       \setunit{\subtitlepunct}%
+       \printfield[sentencecase]{subtitle}
+       \setunit{}%
+       \iffieldundef{usera}
+		  {}
+  	{\printtext{[}\printfield{usera}\printtext{]}}}%
+     \newunit}%
+  \printfield{titleaddon}}
+
+
+\DeclareBibliographyDriver{online}{%
+  \usebibmacro{bibindex}%
+  \usebibmacro{begentry}%
+  \usebibmacro{author/translator+others}%
+  \setunit{\labelnamepunct}\newblock
+  \usebibmacro{title}%
+  \newunit
+  \printlist{language}%
+  \newunit\newblock
+  \usebibmacro{byauthor}%
+  \newunit\newblock
+  \usebibmacro{bytranslator+others}%
+  \newunit\newblock
+  \printfield{version}%
+  \newunit\newblock
+	\usebibmacro{publisher+location+date}
+	\addsemicolon
+	\newunit\newblock
+	\usebibmacro{url+urldate}
+  \usebibmacro{finentry}}
+
+% Driver for article
+% Order of fields for article
+
+\DeclareBibliographyDriver{article}{%
+  \usebibmacro{bibindex}%
+  \usebibmacro{begentry}%
+  \usebibmacro{author/translator+others}%
+  \setunit{\labelnamepunct}\newblock
+  \usebibmacro{title}%
+  \newunit
+  \printlist{language}%
+  \newunit\newblock
+  \usebibmacro{byauthor}%
+  \newunit\newblock
+  \usebibmacro{bytranslator+others}%
+  \newunit\newblock
+  \printfield{version}%
+  \newunit\newblock
+  \usebibmacro{journal+issuetitle}%
+  \newunit
+  \usebibmacro{byeditor+others}%
+  \newunit
+  \usebibmacro{note+pages}%
+  \newunit\newblock
+  \iftoggle{bbx:isbn}
+    {\printfield{issn}}
+    {}%
+  \newunit\newblock
+  \usebibmacro{doi+eprint+url}%
+  \newunit\newblock
+  \usebibmacro{addendum+pubstate}%
+  \setunit{\bibpagerefpunct}\newblock
+  \usebibmacro{pageref}%
+  \newunit\newblock
+  \usebibmacro{related}%
+  \usebibmacro{finentry}}
+
+\endinput
