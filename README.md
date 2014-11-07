@@ -7,10 +7,13 @@ There are still a lot to do with this package. Some of them are:
 In-text citations:
 
 For two authors, make in-text citation as (Author1 and Autho2 YYYY)
+
 -- fixed in the cbx-file 
 
 For three or more authors (Author1 et al. YYYY)
--- can be easily achvieved by setting maxcitename=2 
+
+-- can be easily achieved by setting maxcitename=2 
+
 -- e.g. \usepackage[style=biblatex-cse,maxcitenames=2]{biblatex}
 
 
