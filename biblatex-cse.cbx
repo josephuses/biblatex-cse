@@ -3,5 +3,8 @@
 \RequireCitationStyle{authoryear}
 
 \renewcommand*{\nameyeardelim}{\addspace}
+\renewcommand*{\andothersdelim}{\ifnum\value{listcount}>2 \finalandcomma\fi\addspace}
+\renewcommand{\finalnamedelim}{\ifnum\value{liststop}>2
+\finalandcomma\fi\ifnum\value{liststop}=2 \addspace\bibstring{and}\fi\space}
 
 \endinput
